@@ -53,6 +53,8 @@ def FnormA_du_rmarg(X,y,n_classes):
     
     sol = solvers.qp(P,q,G,h)
     beta = np.array(sol['x'])
+    
+    # alpha.shape = (n, k-1)
     alpha = beta.reshape(-1,n_classes-1)
     
     
@@ -63,8 +65,9 @@ def FnormA_du_rmarg(X,y,n_classes):
     R = np.hstack((-ident, ones_column))
     A = np.linalg.pinv(R).T
     B = A@A.T
-    Theta = np.linalg.inv(B)
+    Theta = np.linalg.inv(B) # this is the identity-plus-all-ones matrix
 
+    # x_i alpha_i^\top \Pi_{y_i} \Theta
     Uhat_list = [X[i,:].reshape(-1,1)@alpha[i,:].reshape(1,-1)@am[y[i]]@Theta for i in range(n)]
     
     Uhat = np.sum(Uhat_list,axis=0)
@@ -84,12 +87,12 @@ def FnormA_du_score(X,y,n_classes):
 
     K = linear_kernel(X)   
     
-    keep = np.mod(np.arange(0,n*k),k)!= np.repeat(y,k)
     P = matrix(np.kron(K, np.eye(k)))
 
     q = matrix((np.eye(k)[y,:] - np.ones((n,k))).flatten())
 
 
+    keep = np.mod(np.arange(0,n*k),k)!= np.repeat(y,k)
     G = matrix(-np.eye(len(q))[keep,:])
     h = matrix(np.zeros(n*(k-1)))
 

@@ -1,6 +1,10 @@
 import numpy as np
 from numba import njit
 
+# Compute the quadratic matrix term in the dual of the MSVM
+# For the explanation, see
+# theory/02_PI_Theta_PI_T_formula.ipynb
+
 @njit
 def dual_quad_matrix(K, y, n_classes):
     # INPUT:
