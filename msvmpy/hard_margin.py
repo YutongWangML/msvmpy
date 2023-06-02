@@ -3,7 +3,11 @@ from cvxopt import matrix, solvers
 from sklearn.metrics.pairwise import linear_kernel
 from .dual_quad_matrix import dual_quad_matrix
 from .matrix_label_code import get_matrix_label_code
+from .fast_matrix_label_code import fmlc_right_with_integer_labels, Rmat_right
 
+solvers.options['show_progress'] = False
+
+# hard margin only
 def FnormA_pr_rmarg(X,y,n_classes):
     # requires: cvxopt
     # FnormA stands for Frobenius norm with preconditioner A
@@ -31,7 +35,7 @@ def FnormA_pr_rmarg(X,y,n_classes):
     q = matrix(np.zeros(d*(k-1)))
     G = matrix(-XcheckT)
     h = matrix(-np.ones(XcheckT.shape[0]))
-    solvers.options['show_progress'] = False
+#     solvers.options['show_progress'] = False
     sol = solvers.qp(P,q,G,h)
     u = np.array(sol['x'])
     U = u.reshape(d,n_classes-1, order='F')
@@ -49,7 +53,6 @@ def FnormA_du_rmarg(X,y,n_classes):
     q = matrix(-np.ones(((k-1)*n,)))
     G = matrix(-np.eye(len(q)))
     h = matrix(np.zeros(len(q)))
-        
     
     sol = solvers.qp(P,q,G,h)
     beta = np.array(sol['x'])
@@ -57,22 +60,10 @@ def FnormA_du_rmarg(X,y,n_classes):
     # alpha.shape = (n, k-1)
     alpha = beta.reshape(-1,n_classes-1)
     
-    
-    am = get_matrix_label_code(k)
 
-    ones_column = np.ones((k-1, 1))
-    ident = np.eye(k-1)
-    R = np.hstack((-ident, ones_column))
-    A = np.linalg.pinv(R).T
-    B = A@A.T
-    Theta = np.linalg.inv(B) # this is the identity-plus-all-ones matrix
-
-    # x_i alpha_i^\top \Pi_{y_i} \Theta
-    Uhat_list = [X[i,:].reshape(-1,1)@alpha[i,:].reshape(1,-1)@am[y[i]]@Theta for i in range(n)]
-    
-    Uhat = np.sum(Uhat_list,axis=0)
-    
-    What = Uhat@A
+    alpha_PI_y = fmlc_right_with_integer_labels(alpha,y,n_classes)
+    alpha_PI_y_R = Rmat_right(alpha_PI_y)
+    What = X.T@alpha_PI_y_R
     
     return (What, alpha)
 
@@ -104,11 +95,6 @@ def FnormA_du_score(X,y,n_classes):
     beta = np.array(sol['x'])
     alpha = beta.reshape(-1,k)
     
-
-    What_list = [(X[i,:].reshape(-1,1))@(alpha[i,:].reshape(1,-1)) for i in range(n)]
-
-
-    What = -np.sum(What_list,axis=0)
-
+    What = -X.T@alpha
     
     return (What, alpha)

@@ -33,7 +33,7 @@ def fmlc_right(z, Y, num_classes):
     # z has shape (n, num_classes-1)
     # Y has shape (n, num_classes), and is the one-hot label embedding of the labels
     Ytrim = Y[:,:-1]
-    C = np.sum(Y*z,axis=1).reshape(-1,1)
+    C = np.sum(Ytrim*z,axis=1).reshape(-1,1)
     D = np.sum(z,axis=1).reshape(-1,1)
     return z - Ytrim*D - Ytrim*C
 
@@ -45,4 +45,11 @@ def fmlc_right_with_integer_labels(z,y, num_classes):
     return fmlc_right(z, np.eye(num_classes)[y], num_classes)
 
 
+# multiply by the R matrix on the right
+# recall that R = [-ones Id] is a (k-1)-by-k matrix
+# if z is a (k-1)-dimensional row vector
+# then zR is a k-dimensional row vector
 
+def Rmat_right(z):
+    # z has shape (n,num_classes-1)
+    return np.hstack((-z, np.sum(z,axis=1)w.reshape(-1,1)))
