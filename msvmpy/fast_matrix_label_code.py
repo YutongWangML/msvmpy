@@ -52,4 +52,4 @@ def fmlc_right_with_integer_labels(z,y, num_classes):
 
 def Rmat_right(z):
     # z has shape (n,num_classes-1)
-    return np.hstack((-z, np.sum(z,axis=1)w.reshape(-1,1)))
+    return np.hstack((-z, np.sum(z,axis=1).reshape(-1,1)))
