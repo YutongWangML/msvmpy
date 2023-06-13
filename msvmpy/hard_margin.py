@@ -2,10 +2,25 @@ import numpy as np
 from cvxopt import matrix, solvers
 from sklearn.metrics.pairwise import linear_kernel
 from .dual_quad_matrix import dual_quad_matrix
+
 from .matrix_label_code import get_matrix_label_code
 from .fast_matrix_label_code import fmlc_right_with_integer_labels, Rmat_right
 
 solvers.options['show_progress'] = False
+
+
+def binary_classic(X,y):
+
+    n, d = X.shape
+    P = matrix(np.eye(d))
+    q = matrix(np.zeros(d))
+    G = matrix(-X*((-1)**(1+y)).reshape(-1,1))
+    h = matrix(-np.ones(n))
+    
+    sol = solvers.qp(P,q,G,h)
+    u = np.array(sol['x'])
+    
+    return (1/2)*np.hstack((-u,u))
 
 # hard margin only
 def FnormA_pr_rmarg(X,y,n_classes):
@@ -39,7 +54,7 @@ def FnormA_pr_rmarg(X,y,n_classes):
     sol = solvers.qp(P,q,G,h)
     u = np.array(sol['x'])
     U = u.reshape(d,n_classes-1, order='F')
-    return U
+    return U@A
 
 
 
