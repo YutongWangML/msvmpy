@@ -2,6 +2,10 @@
 
 Multiclass SVMs in python
 
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FZRY5PSCUKEnOxW_gnnzqI1aRF4tzGVG?usp=sharing)
+
+
 ## Offerings
 
 `hard_margin.py` - hard margin multiclass SVM solved using the QP solver `CVXOPT`
